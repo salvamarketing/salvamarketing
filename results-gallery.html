@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Stellar Card Gallery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            perspective: 1000px;
+        }
+
+        canvas#neuro {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #hud {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        #hud h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 120, 0, 0.8);
+        }
+
+        #hud p {
+            margin: 5px 0 0;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.6;
+        }
+
+        #gallery-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            position: absolute;
+            width: 68px;
+            height: 84px;
+            background: #1F2121;
+            border-radius: 10px;
+            padding: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, transform 0.1s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 20px rgba(255, 120, 0, 0.6);
+            z-index: 1000 !important;
+        }
+
+        .card-img {
+            width: 100%;
+            height: calc(100% - 14px);
+            object-fit: cover;
+            border-radius: 6px;
+            background: #000;
+        }
+
+        .card-label {
+            font-size: 8px;
+            text-align: center;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 700;
+        }
+
+        /* Modal Styles */
+        #modal-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        #modal-content {
+            width: 90%;
+            max-width: 400px;
+            background: #1A1A1A;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 900px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        #modal-img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #modal-title {
+            margin: 0 0 20px;
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            height: 48px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+            font-size: 14px;
+            background: linear-gradient(135deg, #ff6a00, #ee0979);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-download {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-fav {
+            width: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        #close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- Neural Vortex Background -->
+        <canvas id="neuro"></canvas>
+
+        <!-- HUD -->
+        <div id="hud">
+            <h1>3D Stellar Card Gallery</h1>
+            <p>Arraste • Scroll Zoom • Clique nos cards</p>
+        </div>
+
+        <!-- Gallery Wrap -->
+        <div id="gallery-wrap"></div>
+
+        <!-- Modal -->
+        <div id="modal-overlay">
+            <button id="close-btn">&times;</button>
+            <div id="modal-content">
+                <img id="modal-img" src="" alt="">
+                <h2 id="modal-title"></h2>
+                <div class="modal-buttons">
+                    <button class="btn btn-download">⬇ Download</button>
+                    <button class="btn btn-fav" id="fav-btn">♡</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WebGL Scripts -->
+    <script id="vs" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        varying vec2 vUv;
+        void main() {
+            vUv = .5 * (a_position + 1.);
+            gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec2 vUv;
+        uniform float u_time;
+        uniform float u_ratio;
+        uniform vec2 u_pointer_position;
+
+        vec2 rotate(vec2 v, float a) {
+            float s = sin(a);
+            float c = cos(a);
+            mat2 m = mat2(c, -s, s, c);
+            return m * v;
+        }
+
+        float neuro_shape(vec2 uv, float t, float p) {
+            vec2 sine_acc = vec2(0.);
+            vec2 res = uv * rotate(uv, t * 1.5) * 1.5;
+            float scale = 8.0 * 1.2;
+            
+            for (int i = 0; i < 15; i++) {
+                uv = rotate(uv, t);
+                sine_acc = rotate(sine_acc, t);
+                vec2 layer = uv * scale + sine_acc + t;
+                sine_acc += sin(layer);
+                res += (.5 + .5 * cos(layer)) / scale;
+                scale *= 1.2;
+            }
+            return res.x + p * 0.1;
+        }
+
+        void main() {
+            vec2 uv = vUv;
+            uv.x *= u_ratio;
+            
+            float t = u_time * 0.0005;
+            float p = clamp(1. - length(vUv - u_pointer_position), 0., 1.);
+            
+            float noise = neuro_shape(uv, t, p);
+            noise = 1.2 * pow(noise, 3.);
+            noise += pow(noise, 10.);
+            noise = max(0., noise - .5);
+            noise *= (1. - length(vUv - .5));
+
+            // CORES LARANJA/ÂMBAR
+            vec3 color = vec3(0.88, 0.32, 0.02); // Base
+            color = mix(color, vec3(1.0, 0.6, 0.0), 0.32); // Mix 
+            color += vec3(0.85, 0.18, 0.0) * 0.5; // Adição
+            
+            gl_FragColor = vec4(color * noise, noise * 0.92);
+        }
+    </script>
+
+    <script>
+        // --- WebGL Neural Vortex ---
+        const canvas = document.getElementById('neuro');
+        const gl = canvas.getContext('webgl');
+
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            return shader;
+        }
+
+        const vsSource = document.getElementById('vs').text;
+        const fsSource = document.getElementById('fs').text;
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+
+        const posLoc = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const uTime = gl.getUniformLocation(program, 'u_time');
+        const uRatio = gl.getUniformLocation(program, 'u_ratio');
+        const uPtr = gl.getUniformLocation(program, 'u_pointer_position');
+
+        let width, height;
+        let tX = 0, tY = 0, x = 0, y = 0;
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio, 2);
+            width = canvas.clientWidth;
+            height = canvas.clientHeight;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.uniform1f(uRatio, width / height);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        window.addEventListener('pointermove', e => { tX = e.clientX; tY = e.clientY; });
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        function renderVortex(time) {
+            x += (tX - x) * 0.15;
+            y += (tY - y) * 0.15;
+            gl.uniform1f(uTime, time);
+            gl.uniform2f(uPtr, x / width, 1.0 - y / height);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(renderVortex);
+        }
+        renderVortex(0);
+
+        // --- 3D Gallery ---
+        const galleryWrap = document.getElementById('gallery-wrap');
+        const cardData = [
+            { img: "https://i.ibb.co/4ZWcP129/1.png", title: "Elegant Invitation" },
+            { img: "https://i.ibb.co/TMbhBRcL/2.png", title: "Modern Design" },
+            { img: "https://i.ibb.co/spXBFdSm/3.png", title: "Vintage Style" },
+            { img: "https://i.ibb.co/N2TCN0bC/4.png", title: "Minimalist" },
+            { img: "https://i.ibb.co/jZkh6q1M/5.png", title: "Floral Design" },
+            { img: "https://i.ibb.co/6cc7mksr/6.png", title: "Geometric" },
+            { img: "https://i.ibb.co/bjV35jNQ/7.png", title: "Luxury Gold" },
+            { img: "https://i.ibb.co/PZ7WLs7g/8.png", title: "Rustic Style" },
+            { img: "https://i.ibb.co/qLR5bQRM/9.png", title: "Dark Modern" },
+            { img: "https://i.ibb.co/PdNhw3K/10.png", title: "Colorful Party" },
+            { img: "https://i.ibb.co/zWpN1nqJ/11.png", title: "Geometric II" },
+            { img: "https://i.ibb.co/fVYnCXgR/12.png", title: "Luxury Gold II" },
+            { img: "https://i.ibb.co/1G6jZWcZ/13.png", title: "Rustic Style II" },
+            { img: "https://i.ibb.co/xKG7m905/14.png", title: "Dark Modern II" },
+            { img: "https://i.ibb.co/7dJzR3xK/15.png", title: "Colorful Party II" },
+            { img: "https://i.ibb.co/NdJ1csXB/16.png", title: "Elegant Script" },
+            { img: "https://i.ibb.co/8L2Sdt5Q/17.png", title: "Watercolor Art" },
+            { img: "https://i.ibb.co/mC1zxJYq/18.png", title: "Botanical" },
+            { img: "https://i.ibb.co/wryzsKs4/20.png", title: "Art Deco" },
+            { img: "https://i.ibb.co/1fvnxL3L/19.png", title: "Marble Luxury" }
+        ];
+
+        const N = 20;
+        const goldenRatio = (1 + Math.sqrt(5)) / 2;
+        const cards = [];
+
+        cardData.forEach((data, i) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img class="card-img" src="${data.img}" loading="lazy">
+                <div class="card-label">${data.title}</div>
+            `;
+            
+            const y = 1 - (i / (N - 1)) * 2;
+            const radius = Math.sqrt(1 - y * y);
+            const theta = 2 * Math.PI * i / goldenRatio;
+            const layerRadius = 1 + (i % 3) * 0.3;
+
+            const pos = {
+                x: Math.cos(theta) * radius * layerRadius,
+                y: y * layerRadius,
+                z: Math.sin(theta) * radius * layerRadius
+            };
+
+            card.onclick = () => openModal(data);
+            galleryWrap.appendChild(card);
+            cards.push({ el: card, pos, initialPos: { ...pos } });
+        });
+
+        let rotationX = 0;
+        let rotationY = 0;
+        let zoom = 1.2;
+        let isDragging = false;
+        let lastMousePos = { x: 0, y: 0 };
+
+        function updateCards() {
+            rotationY += 0.002; // Auto-rotation
+
+            const transformSphere = (pos) => {
+                // Rotate Y
+                let x1 = pos.x * Math.cos(rotationY) - pos.z * Math.sin(rotationY);
+                let z1 = pos.x * Math.sin(rotationY) + pos.z * Math.cos(rotationY);
+                
+                // Rotate X
+                let y2 = pos.y * Math.cos(rotationX) - z1 * Math.sin(rotationX);
+                let z2 = pos.y * Math.sin(rotationX) + z1 * Math.cos(rotationX);
+                
+                return { x: x1, y: y2, z: z2 };
+            };
+
+            cards.forEach(card => {
+                const p = transformSphere(card.pos);
+                const scale = (p.z + 2) * 200 * zoom;
+                const opacity = Math.max(0.1, (p.z + 1.5) / 3);
+                
+                card.el.style.transform = `translate3d(${p.x * 300 * zoom}px, ${p.y * 300 * zoom}px, ${p.z * 100}px) scale(${scale / 400})`;
+                card.el.style.opacity = opacity;
+                card.el.style.zIndex = Math.round(p.z * 1000);
+            });
+
+            requestAnimationFrame(updateCards);
+        }
+
+        updateCards();
+
+        // --- Interaction ---
+        window.onmousedown = (e) => { isDragging = true; lastMousePos = { x: e.clientX, y: e.clientY }; };
+        window.onmouseup = () => { isDragging = false; };
+        window.onmousemove = (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastMousePos.x;
+            const dy = e.clientY - lastMousePos.y;
+            rotationY += dx * 0.01;
+            rotationX -= dy * 0.01;
+            lastMousePos = { x: e.clientX, y: e.clientY };
+        };
+
+        // Scroll Zoom
+        window.onwheel = (e) => {
+            zoom -= e.deltaY * 0.001;
+            zoom = Math.min(Math.max(zoom, 0.4), 2.2);
+        };
+
+        // Mobile Touch
+        window.ontouchstart = (e) => { isDragging = true; lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; };
+        window.ontouchend = () => { isDragging = false; };
+        window.ontouchmove = (e) => {
+            if (!isDragging) return;
+            const dx = e.touches[0].clientX - lastMousePos.x;
+            const dy = e.touches[0].clientY - lastMousePos.y;
+            rotationY += dx * 0.01;
+            rotationX -= dy * 0.01;
+            lastMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        };
+
+        // --- Modal ---
+        const modal = document.getElementById('modal-overlay');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const favBtn = document.getElementById('fav-btn');
+
+        function openModal(data) {
+            modalImg.src = data.img;
+            modalTitle.innerText = data.title;
+            modal.classList.add('active');
+            favBtn.innerText = '♡';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        document.getElementById('close-btn').onclick = closeModal;
+        modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+
+        favBtn.onclick = () => {
+            favBtn.innerText = favBtn.innerText === '♡' ? '♥' : '♡';
+        };
+
+        // Modal 3D Tilt
+        modalContent.onmousemove = (e) => {
+            const rect = modalContent.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const xc = rect.width / 2;
+            const yc = rect.height / 2;
+            const dx = (x - xc) / xc;
+            const dy = (y - yc) / yc;
+
+            modalContent.style.transform = `rotateX(${dy * -10}deg) rotateY(${dx * 10}deg)`;
+        };
+
+        modalContent.onmouseleave = () => {
+            modalContent.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        };
+
+    </script>
+</body>
+</html>
