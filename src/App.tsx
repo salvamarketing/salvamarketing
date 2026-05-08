@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import Hls from "hls.js";
 import ScrollStack, { ScrollStackItem } from "./components/ui/ScrollStack";
+import heroVideoSrc from "./assets/hero_video.mp4";
+
 const ArrowUpRightIcon = ({ className }: { className?: string }) => (
   <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M7 17L17 7" />
@@ -266,7 +268,7 @@ export default function App() {
       {/* SECTION 1: HERO */}
       <section className="relative w-full h-screen overflow-hidden flex flex-col items-center">
         <FadingVideo
-          src="/hero_video.mp4"
+          src={heroVideoSrc}
           className="absolute left-1/2 top-0 -translate-x-1/2 object-cover object-top z-0"
           style={{ width: "120%", height: "120%" }}
         />
