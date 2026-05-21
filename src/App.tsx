@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import Hls from "hls.js";
+import { Player } from "@remotion/player";
 import ScrollStack, { ScrollStackItem } from "./components/ui/ScrollStack";
 import ParallaxSection from "./components/ui/ParallaxSection";
 import TrueFocus from "./components/ui/TrueFocus";
+import { PerspectiveMarquee } from "./components/ui/PerspectiveMarquee";
 
 const ArrowUpRightIcon = ({ className }: { className?: string }) => (
   <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -349,7 +351,31 @@ const ServicesSection = () => {
   );
 };
 
+function PerspectiveMarqueeScene() {
+  return (
+    <PerspectiveMarquee
+      items={[
+        "Photoshop",
+        "Illustrator",
+        "Premiere Pro",
+        "Pacote Adobe",
+        "Meta Ads",
+        "Marketing Digital"
+      ]}
+      rotateY={-28}
+      rotateX={8}
+      perspective={1200}
+      pixelsPerFrame={2}
+      background="transparent"
+      fadeColor="rgba(0,0,0,0.8)"
+      color="white"
+    />
+  );
+}
+
 export default function App() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   // Suppress specific framer-motion list key warnings
   useEffect(() => {
     const originalError = console.error;
@@ -366,17 +392,17 @@ export default function App() {
     <div className="w-full min-h-screen bg-black font-body text-white selection:bg-white/20">
       
       {/* SECTION 1: HERO */}
-      <section className="relative w-full h-[400vh] bg-black">
-        <div className="sticky top-0 w-full h-screen overflow-hidden flex flex-col items-center">
-          <ScrollDrivenVideo
-            src="/hero_scroll_kf.mp4"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/30 z-0 pointer-events-none" />
-          <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-0 pointer-events-none" />
+      <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
+        <img
+          src="https://lh3.googleusercontent.com/d/1gasCbZTrXLUUtj8zEn2IjSTui4e6vZGz"
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover object-[90%_center] lg:object-[80%_center] z-0"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
-          {/* Navbar */}
-        <nav className="fixed top-4 left-0 w-full px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
+        {/* Navbar */}
+        <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-full flex items-center justify-center text-lg sm:text-xl font-heading italic font-bold">
             S
           </div>
@@ -392,47 +418,81 @@ export default function App() {
             </a>
           </div>
 
-          <div className="w-12 h-12 invisible" aria-hidden="true" />
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden w-10 h-10 border border-white/20 rounded-full flex flex-col items-center justify-center gap-1 cursor-pointer z-[60]"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Menu"
+          >
+            <span className={`w-4 h-0.5 bg-white transition-transform ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
+            <span className={`w-4 h-0.5 bg-white transition-opacity ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
+            <span className={`w-4 h-0.5 bg-white transition-transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          </button>
         </nav>
 
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-40 bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center pt-20"
+            >
+              <div className="flex flex-col items-center gap-8 text-2xl font-heading italic">
+                <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Início</a>
+                <a href="#sobre" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Sobre</a>
+                <a href="#experiencia" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Experiência</a>
+                <a href="#servicos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Serviços</a>
+                <a href="#projetos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Portfólio</a>
+                <a href="#contato" onClick={() => setIsMobileMenuOpen(false)} className="bg-white text-black px-6 py-3 rounded-full text-xl font-bold flex items-center gap-2 mt-4">
+                  Contato <ArrowUpRightIcon className="h-5 w-5" />
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Hero Content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center pt-24 px-4 w-full">
+        <div className="relative z-20 flex-1 flex flex-col items-start justify-center pt-24 px-8 md:px-16 lg:px-24 w-full">
           
-          <TrueFocus 
-            sentence="Lázaro Salvadori"
-            manualMode={false}
-            blurAmount={5}
-            borderColor="white"
-            glowColor="rgba(255, 255, 255, 0.4)"
-            animationDuration={0.8}
-            pauseBetweenAnimations={1}
-            className="flex-nowrap whitespace-nowrap text-[12vw] sm:text-[10vw] lg:text-[8.5vw] xl:text-[8.5rem] font-heading italic text-white leading-none justify-center tracking-[-2px] sm:tracking-[-4px] text-center"
-          />
+          <div className="flex flex-col w-full">
+            <TrueFocus 
+              sentence="Lázaro Salvadori"
+              manualMode={false}
+              blurAmount={5}
+              borderColor="white"
+              glowColor="rgba(255, 255, 255, 0.4)"
+              animationDuration={0.8}
+              pauseBetweenAnimations={1}
+              className="flex-col !gap-0 !items-start text-[12vw] sm:text-[10vw] lg:text-[8vw] xl:text-[8rem] font-heading italic text-white leading-[0.85] lg:leading-[0.8] !justify-start tracking-[-2px] sm:tracking-[-5px] text-left w-full"
+            />
+          </div>
 
           <motion.div 
-            initial={{ filter: "blur(10px)", opacity: 0, y: 20 }}
-            animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+            initial={{ filter: "blur(10px)", opacity: 0, x: -20 }}
+            animate={{ filter: "blur(0px)", opacity: 1, x: 0 }}
             transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
-            className="flex items-center gap-2 mt-4 sm:mt-6"
+            className="flex items-center gap-2 mt-6 sm:mt-8 ml-1 lg:ml-2"
           >
-            <span className="text-sm sm:text-base text-white/80 font-medium uppercase tracking-widest text-center">Designer Gráfico & Comunicação Visual</span>
+            <span className="text-sm sm:text-base md:text-lg text-white/90 font-medium uppercase tracking-[0.2em] text-left">Design Gráfico & Comunicação Visual</span>
           </motion.div>
 
           <motion.div 
-            initial={{ filter: "blur(10px)", opacity: 0, y: 20 }}
-            animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+            initial={{ filter: "blur(10px)", opacity: 0, x: -20 }}
+            animate={{ filter: "blur(0px)", opacity: 1, x: 0 }}
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-8 sm:mt-6 w-full sm:w-auto px-6 sm:px-0"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
-            <a href="#projetos" className="bg-white text-black rounded-full px-6 sm:px-5 py-3 sm:py-2.5 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/80 transition-colors w-full sm:w-auto shadow-xl">
+            <a href="#projetos" className="bg-white text-black rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-200 transition-colors w-full sm:w-auto shadow-xl">
               Ver Projetos <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#contato" className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-2">
+            <a href="#contato" className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-3.5 sm:py-4">
               Entrar em Contato <PlayIcon className="h-4 w-4" />
             </a>
           </motion.div>
 
-        </div>
         </div>
       </section>
 
@@ -561,29 +621,19 @@ export default function App() {
       <ParallaxSection className="py-16 sm:py-24 flex flex-col items-center" bgImage="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop">
         <div className="text-xs sm:text-sm font-light text-white/80 mb-12 uppercase tracking-widest">// Ferramentas que utilizo</div>
         
-        <div className="w-full relative overflow-hidden flex whitespace-nowrap mask-image-linear-edges">
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ ease: "linear", duration: 20, repeat: Infinity }}
-            className="flex items-center gap-12 sm:gap-24 font-heading italic text-white/50 hover:text-white/80 transition-colors text-4xl sm:text-6xl md:text-7xl tracking-[-1px] w-max pr-12 sm:pr-24 shrink-0"
-          >
-            {[
-              "Photoshop",
-              "Illustrator",
-              "Premiere Pro",
-              "Pacote Adobe",
-              "Meta Ads",
-              "Marketing Digital",
-              "Photoshop",
-              "Illustrator",
-              "Premiere Pro",
-              "Pacote Adobe",
-              "Meta Ads",
-              "Marketing Digital"
-            ].map((tool, idx) => (
-              <span key={idx} className="cursor-default">{tool}</span>
-            ))}
-          </motion.div>
+        <div className="w-full relative overflow-hidden" style={{ height: "400px" }}>
+          <Player
+            component={PerspectiveMarqueeScene}
+            durationInFrames={240}
+            fps={30}
+            compositionWidth={1280}
+            compositionHeight={400}
+            style={{ width: "100%", height: "100%" }}
+            controls={false}
+            autoPlay
+            loop
+            clickToPlay={false}
+          />
         </div>
       </ParallaxSection>
 
@@ -641,9 +691,13 @@ export default function App() {
 
       {/* CONTATO */}
       <section id="contato" className="relative py-32 border-t border-white/10 min-h-screen flex items-center justify-center overflow-hidden">
-        <FadingVideo
+        <video
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260417_061226_74f0749c-a22d-42b3-895e-5d6203bc741c.mp4"
           className="absolute inset-0 w-full h-full object-cover z-0"
+          autoPlay
+          loop
+          muted
+          playsInline
         />
         <div className="absolute inset-0 bg-black/50 z-0" />
         
@@ -656,26 +710,26 @@ export default function App() {
             Entre em contato para projetos, parcerias ou oportunidades.
           </p>
           
-          <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-6 text-left w-full max-w-3xl mb-16">
-             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center gap-4">
-               <div className="text-white text-sm font-medium">Marau — RS</div>
+          <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-4 sm:gap-6 text-left w-full max-w-3xl mb-12 sm:mb-16 px-4">
+             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center">
+               <div className="text-white text-sm sm:text-base font-medium">Marau — RS</div>
              </div>
-             <a href="mailto:lazarosalvadori1@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center gap-4 hover:bg-white/20 transition-colors">
-               <div className="text-white text-sm font-medium">lazarosalvadori1@gmail.com</div>
+             <a href="mailto:lazarosalvadori1@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors break-all">
+               <div className="text-white text-sm sm:text-base font-medium">lazarosalvadori1@gmail.com</div>
              </a>
-             <a href="mailto:salvaadesign@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center gap-4 hover:bg-white/20 transition-colors">
-               <div className="text-white text-sm font-medium">salvaadesign@gmail.com</div>
+             <a href="mailto:salvaadesign@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors break-all">
+               <div className="text-white text-sm sm:text-base font-medium">salvaadesign@gmail.com</div>
              </a>
-             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center gap-4 hover:bg-white/20 transition-colors">
-               <div className="text-white text-sm font-medium">(54) 99636-2178</div>
+             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors">
+               <div className="text-white text-sm sm:text-base font-medium">(54) 99636-2178</div>
              </a>
           </div>
           
-          <div className="flex gap-4">
-            <a href="https://instagram.com/salvaagencia" target="_blank" rel="noreferrer" className="bg-white text-black hover:bg-neutral-200 transition-colors shadow-2xl rounded-full px-8 py-4 text-base font-bold flex items-center justify-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
+            <a href="https://instagram.com/salvaagencia" target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-white text-black hover:bg-neutral-200 transition-colors shadow-2xl rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 text-center">
               Instagram @salvaagencia <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#" target="_blank" rel="noreferrer" className="bg-neutral-800 text-white hover:bg-neutral-700 transition-colors shadow-2xl rounded-full px-8 py-4 text-base font-bold flex items-center justify-center gap-2">
+            <a href="#" target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-neutral-800 text-white hover:bg-neutral-700 transition-colors shadow-2xl rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 text-center">
               Portfólio Behance <ArrowUpRightIcon className="h-5 w-5" />
             </a>
           </div>
