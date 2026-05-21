@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-heading: 'Instrument Serif', serif;
-  --font-body: 'Barlow', sans-serif;
+  --font-heading: 'IBRAND', 'Instrument Serif', serif;
+  --font-body: 'IBRAND', 'Barlow', sans-serif;
   --radius-default: 9999px;
 }
 
@@ -10,6 +10,11 @@
   body {
     background-color: #000;
   }
+}
+
+.mask-image-linear-edges {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 .liquid-glass {
