@@ -20,6 +20,44 @@ const PlayIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const tools = [
+  { name: "Photoshop", slug: "adobephotoshop" },
+  { name: "Illustrator", slug: "adobeillustrator" },
+  { name: "InDesign", slug: "adobeindesign" },
+  { name: "Premiere Pro", slug: "adobepremierepro" },
+  { name: "After Effects", slug: "adobeaftereffects" },
+  { name: "Figma", slug: "figma" },
+  { name: "Lightroom", slug: "adobelightroom" },
+];
+
+const ToolsMarquee = () => {
+  const toolSet = tools.map((tool, i) => (
+    <div key={`tool-${i}`} className="flex items-center gap-3 text-white/40 hover:text-white transition-colors duration-300 mr-16 md:mr-24">
+      <img
+        src={`https://cdn.simpleicons.org/${tool.slug}/white`}
+        alt={tool.name}
+        className="w-5 h-5 md:w-6 md:h-6 opacity-80"
+      />
+      <span className="text-sm md:text-xl font-heading font-medium tracking-widest uppercase">{tool.name}</span>
+    </div>
+  ));
+
+  return (
+    <div className="w-full bg-black py-6 md:py-8 border-y border-white/5 flex items-center overflow-hidden relative z-20">
+      <div className="absolute left-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-16 md:w-32 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+      <motion.div
+        className="flex whitespace-nowrap items-center w-max"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 25, ease: "linear", repeat: Infinity }}
+      >
+        <div className="flex items-center">{[...Array(4)].map((_, i) => <React.Fragment key={`set1-${i}`}>{toolSet}</React.Fragment>)}</div>
+        <div className="flex items-center">{[...Array(4)].map((_, i) => <React.Fragment key={`set2-${i}`}>{toolSet}</React.Fragment>)}</div>
+      </motion.div>
+    </div>
+  );
+};
+
 /** 
  * FadingVideo Component
  * Wraps a <video> and handles custom JS crossfades on loop. 
@@ -121,7 +159,7 @@ function FadingVideo({ src, className, style }: { src: string, className?: strin
           style={style} 
         >
           <div className="absolute inset-0 bg-gradient-to-bl from-zinc-800/10 via-black to-zinc-900/30 animate-pulse" />
-          <div className="relative z-10 font-heading italic text-white/10 tracking-tighter" style={{ fontSize: 'clamp(4rem, 15vw, 12rem)' }}>
+          <div className="relative z-10 font-heading text-white/10 tracking-tighter" style={{ fontSize: 'clamp(4rem, 15vw, 12rem)' }}>
             SALVA
           </div>
         </div>
@@ -304,8 +342,8 @@ const ServicesSection = () => {
   return (
     <section className="relative w-full py-24 bg-black overflow-hidden relative z-10" id="planos">
       <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 mb-12 sm:mb-16 mt-16 sm:mt-20">
-        <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Nossos Planos</div>
-        <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px]">
+        <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Nossos Planos</div>
+        <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px]">
           Acelere Seu<br />Crescimento
         </h2>
       </div>
@@ -329,7 +367,7 @@ const ServicesSection = () => {
                 </div>
 
                 <div className="w-full bg-black/40 liquid-glass-strong rounded-2xl md:rounded-[3rem] p-8 md:p-14 flex flex-col relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.03)] z-20 min-h-[340px]">
-                  <h3 className="font-heading italic text-white text-5xl md:text-6xl tracking-[-1px] leading-none mb-6">{item.title}</h3>
+                  <h3 className="font-heading text-white text-5xl md:text-6xl tracking-[-1px] leading-none mb-6">{item.title}</h3>
                   <p className="text-white/80 font-light leading-relaxed max-w-2xl mb-12 text-base md:text-lg">
                     {item.description}
                   </p>
@@ -403,7 +441,7 @@ export default function App() {
 
         {/* Navbar */}
         <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-full flex items-center justify-center text-lg sm:text-xl font-heading italic font-bold">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-full flex items-center justify-center text-lg sm:text-xl font-heading font-bold">
             S
           </div>
           
@@ -440,7 +478,7 @@ export default function App() {
               transition={{ duration: 0.3 }}
               className="fixed inset-0 z-40 bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center pt-20"
             >
-              <div className="flex flex-col items-center gap-8 text-2xl font-heading italic">
+              <div className="flex flex-col items-center gap-8 text-2xl font-heading">
                 <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Início</a>
                 <a href="#sobre" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Sobre</a>
                 <a href="#experiencia" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Experiência</a>
@@ -466,7 +504,7 @@ export default function App() {
               glowColor="rgba(255, 255, 255, 0.4)"
               animationDuration={0.8}
               pauseBetweenAnimations={1}
-              className="flex-col !gap-0 !items-start text-[12vw] sm:text-[10vw] lg:text-[8vw] xl:text-[8rem] font-heading italic text-white leading-[0.85] lg:leading-[0.8] !justify-start tracking-[-2px] sm:tracking-[-5px] text-left w-full"
+              className="flex-col !gap-0 !items-start text-[12vw] sm:text-[10vw] lg:text-[8vw] xl:text-[8rem] font-heading text-white leading-[0.85] lg:leading-[0.8] !justify-start tracking-[-2px] sm:tracking-[-5px] text-left w-full"
             />
           </div>
 
@@ -476,7 +514,7 @@ export default function App() {
             transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
             className="flex items-center gap-2 mt-6 sm:mt-8 ml-1 lg:ml-2"
           >
-            <span className="text-sm sm:text-base md:text-lg text-white/90 font-medium uppercase tracking-[0.2em] text-left">Design Gráfico & Comunicação Visual</span>
+            <span className="text-sm sm:text-base md:text-lg text-white/90 font-subtitle font-thin uppercase tracking-[0.2em] text-left">Design Gráfico & Comunicação Visual</span>
           </motion.div>
 
           <motion.div 
@@ -496,12 +534,15 @@ export default function App() {
         </div>
       </section>
 
+      {/* FERRAMENTAS */}
+      <ToolsMarquee />
+
       {/* SOBRE MIM */}
       <section id="sobre" className="relative min-h-screen w-full bg-black">
         <div className="relative z-10 flex flex-col w-full h-full px-6 md:px-16 lg:px-20 pt-20 md:pt-32 pb-20">
           <div className="mb-auto">
-            <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Sobre Mim</div>
-            <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px] max-w-4xl">
+            <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Sobre Mim</div>
+            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px] max-w-4xl">
               Design com identidade, <br/>estratégia e criatividade
             </h2>
           </div>
@@ -528,16 +569,16 @@ export default function App() {
       </section>
 
       {/* EXPERIÊNCIA */}
-      <ParallaxSection id="experiencia" className="py-24 border-t border-white/10" bgImage="https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=2000&auto=format&fit=crop">
+      <ParallaxSection id="experiencia" className="py-24 border-t border-white/10" bgImage="https://lh3.googleusercontent.com/d/1hwmcQi0e2I16zDQvjRdRDfVAyeQHiSoN">
         <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 mb-12">
-          <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Experiência</div>
-          <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] leading-[0.9] tracking-[-2px] mb-12">
+          <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Experiência</div>
+          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] leading-[0.9] tracking-[-2px] mb-12">
             Minha<br/>Trajetória
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading italic text-2xl text-white mb-1">Naveo</h3>
+              <h3 className="font-heading text-2xl text-white mb-1">Naveo</h3>
               <p className="text-sm font-medium text-white/50 mb-6">2024 / 2025</p>
               <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
                 <li>• Criação de artes para Instagram</li>
@@ -547,7 +588,7 @@ export default function App() {
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading italic text-2xl text-white mb-1">Estampagraf</h3>
+              <h3 className="font-heading text-2xl text-white mb-1">Estampagraf</h3>
               <p className="text-sm font-medium text-white/50 mb-6">2025</p>
               <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
                 <li>• Banners, adesivos e placas</li>
@@ -557,7 +598,7 @@ export default function App() {
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading italic text-2xl text-white mb-1">Spenassato</h3>
+              <h3 className="font-heading text-2xl text-white mb-1">Spenassato</h3>
               <p className="text-sm font-medium text-white/50 mb-6">2020 / 2023</p>
               <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
                 <li>• Criação de uniformes para impressão</li>
@@ -566,7 +607,7 @@ export default function App() {
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading italic text-2xl text-white mb-1">Vittore Labs</h3>
+              <h3 className="font-heading text-2xl text-white mb-1">Vittore Labs</h3>
               <p className="text-sm font-medium text-white/50 mb-6">&nbsp;</p>
               <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
                 <li>• Desenvolvimento criativo</li>
@@ -582,8 +623,8 @@ export default function App() {
       <ParallaxSection id="servicos" className="py-24 border-t border-white/10" bgImage="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2000&auto=format&fit=crop">
         <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 flex flex-col md:flex-row gap-16 md:gap-8">
           <div className="flex-1">
-            <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Serviços</div>
-            <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
+            <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Serviços</div>
+            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
               O que<br/>eu faço
             </h2>
             <div className="flex flex-wrap gap-3">
@@ -595,8 +636,8 @@ export default function App() {
             </div>
           </div>
           <div className="flex-1">
-            <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Diferenciais</div>
-            <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
+            <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Diferenciais</div>
+            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
               Meu foco em<br/>cada projeto
             </h2>
             <ul className="space-y-4">
@@ -617,31 +658,12 @@ export default function App() {
         </div>
       </ParallaxSection>
 
-      {/* FERRAMENTAS */}
-      <ParallaxSection className="py-16 sm:py-24 flex flex-col items-center" bgImage="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop">
-        <div className="text-xs sm:text-sm font-light text-white/80 mb-12 uppercase tracking-widest">// Ferramentas que utilizo</div>
-        
-        <div className="w-full relative overflow-hidden" style={{ height: "400px" }}>
-          <Player
-            component={PerspectiveMarqueeScene}
-            durationInFrames={240}
-            fps={30}
-            compositionWidth={1280}
-            compositionHeight={400}
-            style={{ width: "100%", height: "100%" }}
-            controls={false}
-            autoPlay
-            loop
-            clickToPlay={false}
-          />
-        </div>
-      </ParallaxSection>
 
       {/* PORTFÓLIO */}
-      <ParallaxSection id="projetos" className="py-32 border-t border-white/10" bgImage="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop">
+      <section id="projetos" className="relative py-32 border-t border-white/10 bg-black">
         <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 text-center flex flex-col items-center">
-          <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Portfólio</div>
-          <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-16">
+          <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Portfólio</div>
+          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-16">
             Projetos Selecionados
           </h2>
           
@@ -675,7 +697,7 @@ export default function App() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                       
                       <div className="relative z-20 mt-auto text-left">
-                        <h3 className="font-heading italic text-white text-4xl md:text-6xl tracking-[-1px] leading-none mb-4">{p.title}</h3>
+                        <h3 className="font-heading text-white text-4xl md:text-6xl tracking-[-1px] leading-none mb-4">{p.title}</h3>
                         <p className="text-white/80 font-light leading-relaxed max-w-2xl text-sm md:text-lg">
                           {p.desc}
                         </p>
@@ -687,23 +709,23 @@ export default function App() {
             </ScrollStack>
           </div>
         </div>
-      </ParallaxSection>
+        <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-b from-transparent to-black pointer-events-none z-20" />
+      </section>
 
       {/* CONTATO */}
-      <section id="contato" className="relative py-32 border-t border-white/10 min-h-screen flex items-center justify-center overflow-hidden">
-        <video
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260417_061226_74f0749c-a22d-42b3-895e-5d6203bc741c.mp4"
+      <section id="contato" className="relative py-32 min-h-screen flex items-center justify-center overflow-hidden bg-black">
+        <img
+          src="https://lh3.googleusercontent.com/d/1kCBPYD4syKB2jGuF3nshFdCjiJJvvnCW"
+          alt="Contato Background"
           className="absolute inset-0 w-full h-full object-cover z-0"
-          autoPlay
-          loop
-          muted
-          playsInline
+          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-black/50 z-0" />
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-black to-transparent pointer-events-none z-10" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 text-center flex flex-col items-center">
-          <div className="text-xs sm:text-sm font-light text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Contato</div>
-          <h2 className="font-heading italic text-white text-5xl sm:text-6xl md:text-8xl leading-[0.9] tracking-[-2px] mb-8">
+          <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Contato</div>
+          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-8xl leading-[0.9] tracking-[-2px] mb-8">
             Vamos criar algo<br />juntos?
           </h2>
           <p className="text-white font-light leading-relaxed max-w-2xl mb-12 text-lg sm:text-xl">

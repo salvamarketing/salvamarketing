@@ -3,6 +3,7 @@
 @theme {
   --font-heading: 'IBRAND', 'Instrument Serif', serif;
   --font-body: 'IBRAND', 'Barlow', sans-serif;
+  --font-subtitle: 'Galano Grotesque Alt', sans-serif;
   --radius-default: 9999px;
 }
 
