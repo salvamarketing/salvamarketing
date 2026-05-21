@@ -21,22 +21,21 @@ const PlayIcon = ({ className }: { className?: string }) => (
 );
 
 const tools = [
-  { name: "Photoshop", slug: "adobephotoshop" },
-  { name: "Illustrator", slug: "adobeillustrator" },
-  { name: "InDesign", slug: "adobeindesign" },
-  { name: "Premiere Pro", slug: "adobepremierepro" },
-  { name: "After Effects", slug: "adobeaftereffects" },
-  { name: "Figma", slug: "figma" },
-  { name: "Lightroom", slug: "adobelightroom" },
+  { name: "Figma", img: "https://cdn.simpleicons.org/figma/white" },
+  { name: "Photoshop", img: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-plain.svg" },
+  { name: "Illustrator", img: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-plain.svg" },
+  { name: "Corel Draw", img: "https://cdn.simpleicons.org/coreldraw/white" },
+  { name: "IA's", img: "https://cdn.simpleicons.org/openai/white" },
 ];
 
 const ToolsMarquee = () => {
   const toolSet = tools.map((tool, i) => (
-    <div key={`tool-${i}`} className="flex items-center gap-3 text-white/40 hover:text-white transition-colors duration-300 mr-16 md:mr-24">
+    <div key={`tool-${i}`} className="flex items-center gap-3 text-white transition-colors duration-300 mr-16 md:mr-24">
       <img
-        src={`https://cdn.simpleicons.org/${tool.slug}/white`}
+        src={tool.img}
         alt={tool.name}
-        className="w-5 h-5 md:w-6 md:h-6 opacity-80"
+        className="w-5 h-5 md:w-6 md:h-6 opacity-100"
+        style={tool.name === 'Photoshop' || tool.name === 'Illustrator' ? { filter: 'brightness(0) invert(1)' } : {}}
       />
       <span className="text-sm md:text-xl font-heading font-medium tracking-widest uppercase">{tool.name}</span>
     </div>
