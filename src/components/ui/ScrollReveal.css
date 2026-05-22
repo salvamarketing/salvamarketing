@@ -1,0 +1,11 @@
+.scroll-reveal {
+  margin: 0;
+}
+
+.scroll-reveal-text {
+  /* Using tailwind utility classes for sizing instead of fixed ones */
+}
+
+.word {
+  display: inline-block;
+}

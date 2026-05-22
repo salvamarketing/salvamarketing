@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import Hls from "hls.js";
 import { Player } from "@remotion/player";
 import ScrollStack, { ScrollStackItem } from "./components/ui/ScrollStack";
 import ParallaxSection from "./components/ui/ParallaxSection";
 import TrueFocus from "./components/ui/TrueFocus";
+import ScrollReveal from "./components/ui/ScrollReveal";
 import { PerspectiveMarquee } from "./components/ui/PerspectiveMarquee";
+
+import { Bot } from "lucide-react";
 
 const ArrowUpRightIcon = ({ className }: { className?: string }) => (
   <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -20,23 +23,60 @@ const PlayIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const GPTIcon = ({ className }: { className?: string }) => (
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.597 8.3829v-2.3324a.0757.0757 0 0 1 .0332-.0615L17.46 3.2025a4.4992 4.4992 0 0 1 6.1408 1.6464 4.4708 4.4708 0 0 1 .5346 3.0137l-.1416-.0852-4.783-2.7582a.7712.7712 0 0 0-.7806 0l-5.8428 3.3685zm4.7046-1.5032A4.4755 4.4755 0 0 1 20.31 11.234v-5.5826a.071.071 0 0 0-.038-.052L15.4417 2.813a4.504 4.504 0 0 1 4.4945 4.4944zm-9.6607 4.1254l-5.8428-3.3685a.0804.0804 0 0 0-.0804 0l-4.8302 2.7865a4.4992 4.4992 0 0 0-1.6464 6.1408 4.4708 4.4708 0 0 0 3.0137.5346l-.0852-.142-2.7582-4.783a.7712.7712 0 0 1 0-.7806zm4.7571-7.1432l2.02-1.1686a.0757.0757 0 0 0 .071 0l4.8303 2.7865a4.504 4.504 0 0 1-2.3655 1.9728V6.828a.7664.7664 0 0 0-.3879-.6765zM12 15.2281L8.9141 13.447v-3.562L12 8.1039l3.0859 1.781v3.562z"/>
+  </svg>
+);
+
 const tools = [
-  { name: "Figma", img: "https://cdn.simpleicons.org/figma/white" },
   { name: "Photoshop", img: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-plain.svg" },
   { name: "Illustrator", img: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/illustrator/illustrator-plain.svg" },
   { name: "Corel Draw", img: "https://cdn.simpleicons.org/coreldraw/white" },
-  { name: "IA's", img: "https://cdn.simpleicons.org/openai/white" },
+  { name: "Gemini", img: "https://cdn.simpleicons.org/googlegemini/white" },
+  { name: "GPT", icon: <GPTIcon className="w-5 h-5 md:w-6 md:h-6 text-white" /> },
+  { name: "Manus", icon: <Bot className="w-5 h-5 md:w-6 md:h-6 text-white" /> },
+  { name: "Claude", img: "https://cdn.simpleicons.org/anthropic/white" },
 ];
+
+const PortfolioTitle = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start center", "end start"]
+  });
+
+  const filter = useTransform(scrollYProgress, [0, 0.5], ["blur(0px)", "blur(8px)"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.2]);
+
+  return (
+    <div ref={ref} className="relative h-[20vh] md:h-[30vh] w-full flex flex-col items-center justify-start mt-12 md:mt-24">
+      <motion.div 
+        style={{ filter, opacity }}
+        className="sticky top-[20vh] z-10 text-center flex flex-col items-center"
+      >
+        <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-2 sm:mb-4 uppercase tracking-widest">// Portfólio</div>
+        <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px]">
+          Projetos Selecionados
+        </h2>
+      </motion.div>
+    </div>
+  );
+};
 
 const ToolsMarquee = () => {
   const toolSet = tools.map((tool, i) => (
     <div key={`tool-${i}`} className="flex items-center gap-3 text-white transition-colors duration-300 mr-16 md:mr-24">
-      <img
-        src={tool.img}
-        alt={tool.name}
-        className="w-5 h-5 md:w-6 md:h-6 opacity-100"
-        style={tool.name === 'Photoshop' || tool.name === 'Illustrator' ? { filter: 'brightness(0) invert(1)' } : {}}
-      />
+      {tool.img ? (
+        <img
+          src={tool.img}
+          alt={tool.name}
+          className="w-5 h-5 md:w-6 md:h-6 opacity-100 object-contain"
+          style={['Photoshop', 'Illustrator'].includes(tool.name) ? { filter: 'brightness(0) invert(1)' } : {}}
+        />
+      ) : (
+        tool.icon
+      )}
       <span className="text-sm md:text-xl font-heading font-medium tracking-widest uppercase">{tool.name}</span>
     </div>
   ));
@@ -273,52 +313,6 @@ function ScrollDrivenVideo({ src, className, style }: { src: string, className?:
   );
 }
 
-/**
- * BlurText Component
- * Word-by-word blur-in animation.
- */
-function BlurText({ text, className }: { text: string; className?: string }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
-  const words = text.split(" ");
-
-  const variants = {
-    hidden: { filter: "blur(10px)", opacity: 0, y: 50 },
-    visible: (i: number) => ({
-      filter: ["blur(10px)", "blur(5px)", "blur(0px)"],
-      opacity: [0, 0.5, 1],
-      y: [50, -5, 0],
-      transition: {
-        duration: 0.7,
-        times: [0, 0.5, 1],
-        ease: "easeOut" as const,
-        delay: (i * 100) / 1000,
-      },
-    }),
-  };
-
-  return (
-    <p
-      ref={ref}
-      className={className}
-      style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", rowGap: "0.1em" }}
-    >
-      {words.map((word, i) => (
-        <motion.span
-          key={i}
-          custom={i}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          variants={variants}
-          style={{ display: "inline-block", marginRight: "0.28em" }}
-        >
-          {word}
-        </motion.span>
-      ))}
-    </p>
-  );
-}
-
 const plans = [
   {
     title: "Plano Essencial",
@@ -365,7 +359,7 @@ const ServicesSection = () => {
                   <span className="text-white/90 text-xs md:text-sm font-body tracking-wider uppercase font-medium relative z-10">0{idx + 1}</span>
                 </div>
 
-                <div className="w-full bg-black/40 liquid-glass-strong rounded-2xl md:rounded-[3rem] p-8 md:p-14 flex flex-col relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.03)] z-20 min-h-[340px]">
+                <div className="w-full bg-black/40 liquid-glass-strong rounded-2xl md:rounded-[3rem] p-6 sm:p-8 md:p-14 flex flex-col relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.03)] z-20 min-h-[340px]">
                   <h3 className="font-heading text-white text-5xl md:text-6xl tracking-[-1px] leading-none mb-6">{item.title}</h3>
                   <p className="text-white/80 font-light leading-relaxed max-w-2xl mb-12 text-base md:text-lg">
                     {item.description}
@@ -522,7 +516,7 @@ export default function App() {
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
-            <a href="#projetos" className="bg-white text-black rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-200 transition-colors w-full sm:w-auto shadow-xl">
+            <a href="#projetos" className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl">
               Ver Projetos <ArrowUpRightIcon className="h-5 w-5" />
             </a>
             <a href="#contato" className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-3.5 sm:py-4">
@@ -538,48 +532,48 @@ export default function App() {
 
       {/* SOBRE MIM */}
       <section id="sobre" className="relative min-h-screen w-full bg-black">
-        <div className="relative z-10 flex flex-col w-full h-full px-6 md:px-16 lg:px-20 pt-20 md:pt-32 pb-20">
+        <div className="relative z-10 flex flex-col w-full h-full px-6 md:px-16 lg:px-20 pt-16 md:pt-32 pb-16 md:pb-24">
           <div className="mb-auto">
             <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Sobre Mim</div>
-            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px] max-w-4xl">
-              Design com identidade, <br/>estratégia e criatividade
+            <h2 className="font-heading text-white text-4xl sm:text-5xl md:text-7xl lg:text-[6rem] leading-[0.9] tracking-[-2px] sm:tracking-[-3px] max-w-4xl">
+              <ScrollReveal>Design com identidade, estratégia e criatividade</ScrollReveal>
             </h2>
           </div>
   
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 w-full text-white/90 font-light text-sm sm:text-base leading-relaxed">
             <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10">
-              <p className="mb-6 text-lg sm:text-xl leading-snug">
+              <div className="mb-6 text-lg sm:text-xl leading-snug">
                 Sou designer gráfico com mais de 10 anos de experiência atuando entre design, impressão gráfica, social media e marketing digital.
-              </p>
-              <p className="text-white/70">
+              </div>
+              <div className="text-white/80">
                 Ao longo da minha trajetória, participei de projetos voltados para criação de marcas, campanhas digitais, comunicação visual e produção criativa para empresas e negócios locais.
-              </p>
+              </div>
             </div>
             <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10">
-              <p className="mb-6 text-lg sm:text-xl leading-snug">
+              <div className="mb-6 text-lg sm:text-xl leading-snug">
                 Também atuei na Vittore Labs, em Marau, desenvolvendo soluções visuais e estratégias digitais voltadas para posicionamento de marca e presença online.
-              </p>
-              <p className="text-white/70">
+              </div>
+              <div className="text-white/80">
                 Meu objetivo é criar projetos que transmitam personalidade, profissionalismo e impacto visual.
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* EXPERIÊNCIA */}
-      <ParallaxSection id="experiencia" className="py-24 border-t border-white/10" bgImage="https://lh3.googleusercontent.com/d/1hwmcQi0e2I16zDQvjRdRDfVAyeQHiSoN">
+      <ParallaxSection id="experiencia" className="py-16 md:py-24 border-t border-white/10" bgImage="https://lh3.googleusercontent.com/d/1hwmcQi0e2I16zDQvjRdRDfVAyeQHiSoN">
         <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 mb-12">
           <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Experiência</div>
-          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] leading-[0.9] tracking-[-2px] mb-12">
-            Minha<br/>Trajetória
+          <h2 className="font-heading text-white text-4xl sm:text-5xl md:text-7xl lg:text-[5rem] leading-[0.9] tracking-[-2px] mb-12">
+            <ScrollReveal>{"Minha\nTrajetória"}</ScrollReveal>
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading text-2xl text-white mb-1">Naveo</h3>
-              <p className="text-sm font-medium text-white/50 mb-6">2024 / 2025</p>
-              <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
+              <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Naveo</ScrollReveal></h3>
+              <p className="text-sm font-medium text-white/70 mb-6">2024 / 2025</p>
+              <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Criação de artes para Instagram</li>
                 <li>• Criativos para anúncios</li>
                 <li>• Agendamento de posts</li>
@@ -587,9 +581,9 @@ export default function App() {
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading text-2xl text-white mb-1">Estampagraf</h3>
-              <p className="text-sm font-medium text-white/50 mb-6">2025</p>
-              <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
+              <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Estampagraf</ScrollReveal></h3>
+              <p className="text-sm font-medium text-white/70 mb-6">2025</p>
+              <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Banners, adesivos e placas</li>
                 <li>• Comunicação visual para empresas</li>
                 <li>• Operação de impressão</li>
@@ -597,18 +591,18 @@ export default function App() {
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading text-2xl text-white mb-1">Spenassato</h3>
-              <p className="text-sm font-medium text-white/50 mb-6">2020 / 2023</p>
-              <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
+              <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Spenassato</ScrollReveal></h3>
+              <p className="text-sm font-medium text-white/70 mb-6">2020 / 2023</p>
+              <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Criação de uniformes para impressão</li>
                 <li>• Layouts personalizados</li>
                 <li>• Desenvolvimento de materiais gráficos</li>
               </ul>
             </div>
             <div className="liquid-glass rounded-2xl p-6 flex flex-col">
-              <h3 className="font-heading text-2xl text-white mb-1">Vittore Labs</h3>
-              <p className="text-sm font-medium text-white/50 mb-6">&nbsp;</p>
-              <ul className="text-sm text-white/70 space-y-2 flex-col font-light">
+              <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Vittore Labs</ScrollReveal></h3>
+              <p className="text-sm font-medium text-white/70 mb-6">&nbsp;</p>
+              <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Desenvolvimento criativo</li>
                 <li>• Design para presença digital</li>
                 <li>• Estratégias visuais e campanhas online</li>
@@ -616,15 +610,13 @@ export default function App() {
             </div>
           </div>
         </div>
-      </ParallaxSection>
 
-      {/* SERVIÇOS & DIFERENCIAIS */}
-      <ParallaxSection id="servicos" className="py-24 border-t border-white/10" bgImage="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2000&auto=format&fit=crop">
-        <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 flex flex-col md:flex-row gap-16 md:gap-8">
+        {/* SERVIÇOS & DIFERENCIAIS */}
+        <div id="servicos" className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 flex flex-col md:flex-row gap-12 md:gap-16 mt-16 md:mt-24">
           <div className="flex-1">
             <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Serviços</div>
-            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
-              O que<br/>eu faço
+            <h2 className="font-heading text-white text-4xl sm:text-5xl md:text-7xl leading-[0.9] tracking-[-2px] mb-8 md:mb-12">
+              {"O que\neu faço"}
             </h2>
             <div className="flex flex-wrap gap-3">
               {['Design Gráfico', 'Identidade Visual', 'Social Media', 'Criativos para Anúncios', 'Landing Pages', 'Comunicação Visual', 'Fotografia e Vídeos', 'Edição de Fotos/Vídeos', 'Tráfego Pago (Locais)'].map(item => (
@@ -634,10 +626,10 @@ export default function App() {
               ))}
             </div>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 mt-6 md:mt-0">
             <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Diferenciais</div>
-            <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-12">
-              Meu foco em<br/>cada projeto
+            <h2 className="font-heading text-white text-4xl sm:text-5xl md:text-7xl leading-[0.9] tracking-[-2px] mb-8 md:mb-12">
+              {"Meu foco em\ncada projeto"}
             </h2>
             <ul className="space-y-4">
               {[
@@ -648,8 +640,8 @@ export default function App() {
                 'Experiência prática no mercado gráfico e digital',
                 'Desenvolvimento visual alinhado ao posicionamento da empresa'
               ].map(item => (
-                <li key={item} className="flex gap-3 text-white/80 font-light items-start">
-                  <ArrowUpRightIcon className="w-5 h-5 shrink-0 mt-0.5 text-white/50" /> {item}
+                <li key={item} className="flex gap-3 text-white/90 font-light items-start">
+                  <ArrowUpRightIcon className="w-5 h-5 shrink-0 mt-0.5 text-white/70" /> {item}
                 </li>
               ))}
             </ul>
@@ -659,14 +651,11 @@ export default function App() {
 
 
       {/* PORTFÓLIO */}
-      <section id="projetos" className="relative py-32 border-t border-white/10 bg-black">
+      <section id="projetos" className="relative py-16 md:py-32 border-t border-white/10 bg-black">
         <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-20 text-center flex flex-col items-center">
-          <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Portfólio</div>
-          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-7xl leading-[0.9] tracking-[-2px] mb-16">
-            Projetos Selecionados
-          </h2>
+          <PortfolioTitle />
           
-          <div className="max-w-6xl mx-auto w-full px-6 md:px-8 mt-12">
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 mt-0 relative z-20">
             <ScrollStack
               useWindowScroll={true}
               itemDistance={120}
@@ -691,15 +680,17 @@ export default function App() {
                       <span className="text-white/90 text-xs md:text-sm font-body tracking-wider uppercase font-medium relative z-10">0{idx + 1}</span>
                     </div>
 
-                    <div className="w-full flex-1 bg-black/40 liquid-glass-strong rounded-2xl md:rounded-[3rem] p-8 md:p-14 flex flex-col relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.03)] z-20">
+                    <div className="w-full flex-1 bg-black/40 liquid-glass-strong rounded-2xl md:rounded-[3rem] p-6 sm:p-8 md:p-14 flex flex-col relative overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.03)] z-20">
                       <img src={p.img} alt={p.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-40 z-0" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
                       
                       <div className="relative z-20 mt-auto text-left">
-                        <h3 className="font-heading text-white text-4xl md:text-6xl tracking-[-1px] leading-none mb-4">{p.title}</h3>
-                        <p className="text-white/80 font-light leading-relaxed max-w-2xl text-sm md:text-lg">
+                        <h3 className="font-heading text-white text-3xl sm:text-4xl md:text-6xl tracking-[-1px] leading-none mb-4">
+                          {p.title}
+                        </h3>
+                        <div className="text-white/80 font-light leading-relaxed max-w-2xl text-sm sm:text-base md:text-lg">
                           {p.desc}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -712,7 +703,7 @@ export default function App() {
       </section>
 
       {/* CONTATO */}
-      <section id="contato" className="relative py-32 min-h-screen flex items-center justify-center overflow-hidden bg-black">
+      <section id="contato" className="relative py-16 md:py-32 min-h-[90vh] flex items-center justify-center overflow-hidden bg-black">
         <img
           src="https://lh3.googleusercontent.com/d/1kCBPYD4syKB2jGuF3nshFdCjiJJvvnCW"
           alt="Contato Background"
@@ -724,33 +715,33 @@ export default function App() {
         
         <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-8 text-center flex flex-col items-center">
           <div className="text-xs sm:text-sm font-subtitle font-thin text-white/80 mb-4 sm:mb-6 uppercase tracking-widest">// Contato</div>
-          <h2 className="font-heading text-white text-5xl sm:text-6xl md:text-8xl leading-[0.9] tracking-[-2px] mb-8">
-            Vamos criar algo<br />juntos?
+          <h2 className="font-heading text-white text-4xl sm:text-5xl md:text-8xl leading-[0.9] tracking-[-2px] mb-6 md:mb-8">
+            <ScrollReveal>{"Vamos criar algo\njuntos?"}</ScrollReveal>
           </h2>
-          <p className="text-white font-light leading-relaxed max-w-2xl mb-12 text-lg sm:text-xl">
+          <div className="text-white/90 font-subtitle font-thin uppercase tracking-[0.2em] leading-relaxed max-w-2xl mb-12 text-sm sm:text-base md:text-lg text-balance">
             Entre em contato para projetos, parcerias ou oportunidades.
-          </p>
+          </div>
           
           <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-4 sm:gap-6 text-left w-full max-w-3xl mb-12 sm:mb-16 px-4">
-             <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center">
-               <div className="text-white text-sm sm:text-base font-medium">Marau — RS</div>
+             <div className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-xl text-center">
+               Marau — RS
              </div>
-             <a href="mailto:lazarosalvadori1@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors break-all">
-               <div className="text-white text-sm sm:text-base font-medium">lazarosalvadori1@gmail.com</div>
+             <a href="mailto:lazarosalvadori1@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center break-all">
+               lazarosalvadori1@gmail.com
              </a>
-             <a href="mailto:salvaadesign@gmail.com" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors break-all">
-               <div className="text-white text-sm sm:text-base font-medium">salvaadesign@gmail.com</div>
+             <a href="mailto:salvaadesign@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center break-all">
+               salvaadesign@gmail.com
              </a>
-             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl py-4 px-6 flex items-center justify-center text-center hover:bg-white/20 transition-colors">
-               <div className="text-white text-sm sm:text-base font-medium">(54) 99636-2178</div>
+             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center">
+               (54) 99636-2178
              </a>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
-            <a href="https://instagram.com/salvaagencia" target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-white text-black hover:bg-neutral-200 transition-colors shadow-2xl rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 text-center">
+            <a href="https://www.instagram.com/salvaagencia/" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl text-center">
               Instagram @salvaagencia <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#" target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-neutral-800 text-white hover:bg-neutral-700 transition-colors shadow-2xl rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 text-center">
+            <a href="https://www.behance.net/salvapng" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl text-center">
               Portfólio Behance <ArrowUpRightIcon className="h-5 w-5" />
             </a>
           </div>
