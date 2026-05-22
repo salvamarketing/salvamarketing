@@ -28,8 +28,8 @@ const ScrollReveal = ({
   blurStrength = 4,
   containerClassName = '',
   textClassName = '',
-  rotationEnd = 'bottom bottom',
-  wordAnimationEnd = 'bottom bottom'
+  rotationEnd = 'top top',
+  wordAnimationEnd = 'center center'
 }: ScrollRevealProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,7 +63,7 @@ const ScrollReveal = ({
           scroller,
           start: 'top bottom',
           end: rotationEnd,
-          scrub: true
+          scrub: 1.5
         }
       }
     );
@@ -80,9 +80,9 @@ const ScrollReveal = ({
         scrollTrigger: {
           trigger: el,
           scroller,
-          start: 'top bottom-=20%',
+          start: 'top bottom',
           end: wordAnimationEnd,
-          scrub: true
+          scrub: 1.5
         }
       }
     );
@@ -98,9 +98,9 @@ const ScrollReveal = ({
           scrollTrigger: {
             trigger: el,
             scroller,
-            start: 'top bottom-=20%',
+            start: 'top bottom',
             end: wordAnimationEnd,
-            scrub: true
+            scrub: 1.5
           }
         }
       );

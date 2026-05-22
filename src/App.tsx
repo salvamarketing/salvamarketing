@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform, animate } from "framer-motion";
 import Hls from "hls.js";
 import { Player } from "@remotion/player";
 import ScrollStack, { ScrollStackItem } from "./components/ui/ScrollStack";
@@ -419,6 +419,27 @@ export default function App() {
     };
   }, []);
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    if (targetId === '#') {
+      animate(window.scrollY, 0, {
+        duration: 1.2,
+        ease: [0.22, 1, 0.36, 1],
+        onUpdate: (latest) => window.scrollTo(0, latest)
+      });
+    } else {
+      const element = document.querySelector(targetId);
+      if (element) {
+        animate(window.scrollY, element.getBoundingClientRect().top + window.scrollY, {
+          duration: 1.2,
+          ease: [0.22, 1, 0.36, 1],
+          onUpdate: (latest) => window.scrollTo(0, latest)
+        });
+      }
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="w-full min-h-screen bg-black font-body text-white selection:bg-white/20">
       
@@ -435,16 +456,16 @@ export default function App() {
         {/* Navbar */}
         <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-full flex items-center justify-center text-lg sm:text-xl font-heading font-bold">
-            S
+            LS
           </div>
           
           <div className="hidden md:flex border border-white/20 rounded-full px-1.5 py-1.5 items-center gap-1">
-            <a href="#" className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Início</a>
-            <a href="#sobre" className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Sobre</a>
-            <a href="#experiencia" className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Experiência</a>
-            <a href="#servicos" className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Serviços</a>
-            <a href="#projetos" className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Portfólio</a>
-            <a href="#contato" className="bg-white text-black px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-1 ml-1 hover:bg-neutral-200 transition-colors">
+            <a href="#" onClick={(e) => handleScrollTo(e, '#')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Início</a>
+            <a href="#sobre" onClick={(e) => handleScrollTo(e, '#sobre')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Sobre</a>
+            <a href="#experiencia" onClick={(e) => handleScrollTo(e, '#experiencia')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Experiência</a>
+            <a href="#servicos" onClick={(e) => handleScrollTo(e, '#servicos')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Serviços</a>
+            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Portfólio</a>
+            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="bg-white text-black px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-1 ml-1 hover:bg-neutral-200 transition-colors">
               Contato <ArrowUpRightIcon className="h-4 w-4" />
             </a>
           </div>
@@ -472,12 +493,12 @@ export default function App() {
               className="fixed inset-0 z-40 bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center pt-20"
             >
               <div className="flex flex-col items-center gap-8 text-2xl font-heading">
-                <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Início</a>
-                <a href="#sobre" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Sobre</a>
-                <a href="#experiencia" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Experiência</a>
-                <a href="#servicos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Serviços</a>
-                <a href="#projetos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-white/70 transition-colors">Portfólio</a>
-                <a href="#contato" onClick={() => setIsMobileMenuOpen(false)} className="bg-white text-black px-6 py-3 rounded-full text-xl font-bold flex items-center gap-2 mt-4">
+                <a href="#" onClick={(e) => handleScrollTo(e, '#')} className="hover:text-white/70 transition-colors">Início</a>
+                <a href="#sobre" onClick={(e) => handleScrollTo(e, '#sobre')} className="hover:text-white/70 transition-colors">Sobre</a>
+                <a href="#experiencia" onClick={(e) => handleScrollTo(e, '#experiencia')} className="hover:text-white/70 transition-colors">Experiência</a>
+                <a href="#servicos" onClick={(e) => handleScrollTo(e, '#servicos')} className="hover:text-white/70 transition-colors">Serviços</a>
+                <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="hover:text-white/70 transition-colors">Portfólio</a>
+                <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="bg-white text-black px-6 py-3 rounded-full text-xl font-bold flex items-center gap-2 mt-4">
                   Contato <ArrowUpRightIcon className="h-5 w-5" />
                 </a>
               </div>
@@ -516,10 +537,10 @@ export default function App() {
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
-            <a href="#projetos" className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl">
+            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl">
               Ver Projetos <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#contato" className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-3.5 sm:py-4">
+            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-3.5 sm:py-4">
               Entrar em Contato <PlayIcon className="h-4 w-4" />
             </a>
           </motion.div>
