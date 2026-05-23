@@ -351,7 +351,7 @@ const ServicesSection = () => {
         >
           {plans.map((item, idx) => (
             <ScrollStackItem key={idx} itemClassName="!p-0 !bg-transparent !shadow-none !border-none !m-0 !h-auto">
-              <div className="relative group pt-8 md:pt-10 mb-8 max-w-4xl mx-auto">
+              <div className="relative group pt-8 md:pt-10 mb-8 max-w-4xl mx-auto transition-all duration-500 hover:-translate-y-4 hover:shadow-[0_0_60px_rgba(255,255,255,0.15)]">
                 {/* Folder Tab */}
                 <div className="absolute top-0 left-4 md:left-12 px-6 h-10 md:h-12 rounded-t-xl md:rounded-t-2xl liquid-glass flex items-center gap-3 z-30 overflow-hidden shadow-lg border-b-0">
                   <div className={`absolute inset-0 bg-gradient-to-t from-white/10 to-transparent opacity-40`} />
@@ -448,7 +448,7 @@ export default function App() {
         <img
           src="https://lh3.googleusercontent.com/d/1gasCbZTrXLUUtj8zEn2IjSTui4e6vZGz"
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover object-[90%_center] lg:object-[80%_center] z-0"
+          className="absolute inset-0 w-full h-full object-cover object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center] z-0"
           referrerPolicy="no-referrer"
         />
         <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
@@ -562,7 +562,7 @@ export default function App() {
           </div>
   
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16 w-full text-white/90 font-light text-sm sm:text-base leading-relaxed">
-            <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10">
+            <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:border-white/20">
               <div className="mb-6 text-lg sm:text-xl leading-snug">
                 Sou designer gráfico com mais de 10 anos de experiência atuando entre design, impressão gráfica, social media e marketing digital.
               </div>
@@ -570,9 +570,9 @@ export default function App() {
                 Ao longo da minha trajetória, participei de projetos voltados para criação de marcas, campanhas digitais, comunicação visual e produção criativa para empresas e negócios locais.
               </div>
             </div>
-            <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10">
+            <div className="liquid-glass border border-white/10 rounded-[1.25rem] p-8 md:p-10 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:border-white/20">
               <div className="mb-6 text-lg sm:text-xl leading-snug">
-                Também atuei na Vittore Labs, em Marau, desenvolvendo soluções visuais e estratégias digitais voltadas para posicionamento de marca e presença online.
+                Atualmente atuando na Vittore Labs, em Passo Fundo, como analista de marketing, criando conteúdo e design de embalagens para produtos como creatina e encapsulados.
               </div>
               <div className="text-white/80">
                 Meu objetivo é criar projetos que transmitam personalidade, profissionalismo e impacto visual.
@@ -591,9 +591,9 @@ export default function App() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="liquid-glass rounded-2xl p-6 flex flex-col">
+            <div className="liquid-glass rounded-2xl p-6 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] relative z-10 hover:z-20">
               <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Naveo</ScrollReveal></h3>
-              <p className="text-sm font-medium text-white/70 mb-6">2024 / 2025</p>
+              <p className="text-sm font-medium text-white/70 mb-6">Fev 2024 - Jan 2025</p>
               <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Criação de artes para Instagram</li>
                 <li>• Criativos para anúncios</li>
@@ -601,9 +601,9 @@ export default function App() {
                 <li>• Desenvolvimento visual para campanhas</li>
               </ul>
             </div>
-            <div className="liquid-glass rounded-2xl p-6 flex flex-col">
+            <div className="liquid-glass rounded-2xl p-6 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] relative z-10 hover:z-20">
               <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Estampagraf</ScrollReveal></h3>
-              <p className="text-sm font-medium text-white/70 mb-6">2025</p>
+              <p className="text-sm font-medium text-white/70 mb-6">Fev 2025 - Dez 2025</p>
               <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Banners, adesivos e placas</li>
                 <li>• Comunicação visual para empresas</li>
@@ -611,22 +611,22 @@ export default function App() {
                 <li>• Atendimento ao público</li>
               </ul>
             </div>
-            <div className="liquid-glass rounded-2xl p-6 flex flex-col">
+            <div className="liquid-glass rounded-2xl p-6 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] relative z-10 hover:z-20">
               <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Spenassato</ScrollReveal></h3>
-              <p className="text-sm font-medium text-white/70 mb-6">2020 / 2023</p>
+              <p className="text-sm font-medium text-white/70 mb-6">Mar 2020 - Nov 2023</p>
               <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
                 <li>• Criação de uniformes para impressão</li>
                 <li>• Layouts personalizados</li>
                 <li>• Desenvolvimento de materiais gráficos</li>
               </ul>
             </div>
-            <div className="liquid-glass rounded-2xl p-6 flex flex-col">
+            <div className="liquid-glass rounded-2xl p-6 flex flex-col transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] relative z-10 hover:z-20">
               <h3 className="font-heading text-2xl text-white mb-1"><ScrollReveal>Vittore Labs</ScrollReveal></h3>
-              <p className="text-sm font-medium text-white/70 mb-6">&nbsp;</p>
+              <p className="text-sm font-medium text-white/70 mb-6">Jan 2026 - Presente</p>
               <ul className="text-sm text-white/80 space-y-2 flex-col font-light">
-                <li>• Desenvolvimento criativo</li>
-                <li>• Design para presença digital</li>
-                <li>• Estratégias visuais e campanhas online</li>
+                <li>• Analista de Marketing</li>
+                <li>• Criação de conteúdo digital</li>
+                <li>• Embalagens para creatina e encapsulados (linha farmacêutica)</li>
               </ul>
             </div>
           </div>
@@ -726,7 +726,7 @@ export default function App() {
       {/* CONTATO */}
       <section id="contato" className="relative py-16 md:py-32 min-h-[90vh] flex items-center justify-center overflow-hidden bg-black">
         <img
-          src="https://lh3.googleusercontent.com/d/1kCBPYD4syKB2jGuF3nshFdCjiJJvvnCW"
+          src="https://lh3.googleusercontent.com/d/1DNe1SjHW2yiIirYwv9gFCK7xr4bsmfO8"
           alt="Contato Background"
           className="absolute inset-0 w-full h-full object-cover z-0"
           referrerPolicy="no-referrer"
@@ -744,25 +744,25 @@ export default function App() {
           </div>
           
           <div className="flex flex-col sm:flex-row flex-wrap justify-center items-stretch gap-4 sm:gap-6 text-left w-full max-w-3xl mb-12 sm:mb-16 px-4">
-             <div className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-xl text-center">
+             <div className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
                Marau — RS
              </div>
-             <a href="mailto:lazarosalvadori1@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center break-all">
+             <a href="mailto:lazarosalvadori1@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
                lazarosalvadori1@gmail.com
              </a>
-             <a href="mailto:salvaadesign@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center break-all">
+             <a href="mailto:salvaadesign@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
                salvaadesign@gmail.com
              </a>
-             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors shadow-xl text-center">
+             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
                (54) 99636-2178
              </a>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
-            <a href="https://www.instagram.com/salvaagencia/" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl text-center">
+            <a href="https://www.instagram.com/salvaagencia/" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
               Instagram @salvaagencia <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="https://www.behance.net/salvapng" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl text-center">
+            <a href="https://www.behance.net/salvapng" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
               Portfólio Behance <ArrowUpRightIcon className="h-5 w-5" />
             </a>
           </div>
