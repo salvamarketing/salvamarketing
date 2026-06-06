@@ -404,6 +404,58 @@ function PerspectiveMarqueeScene() {
   );
 }
 
+const SeamlessBackgroundVideo = ({ src, videoClassName }: { src: string, videoClassName?: string }) => {
+  const video1Ref = useRef<HTMLVideoElement>(null);
+  const video2Ref = useRef<HTMLVideoElement>(null);
+  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
+  const CROSSFADE_DURATION = 1.0; 
+
+  useEffect(() => {
+    if (video1Ref.current) {
+      video1Ref.current.play().catch(() => {});
+    }
+  }, []);
+
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>, videoId: 1 | 2) => {
+    const video = e.currentTarget;
+    if (video.duration) {
+      const timeLeft = video.duration - video.currentTime;
+      if (timeLeft <= CROSSFADE_DURATION) {
+         if (activeVideo === videoId) {
+            const nextVideoId = videoId === 1 ? 2 : 1;
+            const nextVideoRef = nextVideoId === 1 ? video1Ref : video2Ref;
+            setActiveVideo(nextVideoId);
+            if (nextVideoRef.current) {
+                nextVideoRef.current.currentTime = 0;
+                nextVideoRef.current.play().catch(() => {});
+            }
+         }
+      }
+    }
+  };
+
+  return (
+    <>
+      <video
+        ref={video1Ref}
+        src={src}
+        muted
+        playsInline
+        onTimeUpdate={(e) => handleTimeUpdate(e, 1)}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out z-0 ${activeVideo === 1 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
+      />
+      <video
+        ref={video2Ref}
+        src={src}
+        muted
+        playsInline
+        onTimeUpdate={(e) => handleTimeUpdate(e, 2)}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out z-0 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
+      />
+    </>
+  );
+};
+
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -445,11 +497,9 @@ export default function App() {
       
       {/* SECTION 1: HERO */}
       <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        <img
-          src="https://lh3.googleusercontent.com/d/1gasCbZTrXLUUtj8zEn2IjSTui4e6vZGz"
-          alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center] z-0"
-          referrerPolicy="no-referrer"
+        <SeamlessBackgroundVideo 
+          src="/hero-bg.mp4"
+          videoClassName="object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center]"
         />
         <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
@@ -537,10 +587,10 @@ export default function App() {
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
-            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-colors w-full sm:w-auto shadow-xl">
+            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl bg-black/20 backdrop-blur-md border border-white/10">
               Ver Projetos <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="text-sm font-bold text-white flex items-center justify-center gap-2 hover:text-white/70 transition-colors w-full sm:w-auto py-3.5 sm:py-4">
+            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="liquid-glass text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto py-3.5 sm:py-4 px-8 bg-black/20 backdrop-blur-md border border-white/10 shadow-xl">
               Entrar em Contato <PlayIcon className="h-4 w-4" />
             </a>
           </motion.div>
