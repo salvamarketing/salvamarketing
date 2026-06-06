@@ -404,64 +404,52 @@ function PerspectiveMarqueeScene() {
   );
 }
 
-const SeamlessBackgroundVideo = ({ src, videoClassName }: { src: string, videoClassName?: string }) => {
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
-  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
-  const CROSSFADE_DURATION = 1.0; 
+const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: string, videoClassName?: string, scrollProgress: any }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (video1Ref.current) {
-      video1Ref.current.play().catch(() => {});
+    // Force mobile inline / muted
+    if (videoRef.current) {
+        videoRef.current.defaultMuted = true;
+        videoRef.current.muted = true;
     }
   }, []);
 
-  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>, videoId: 1 | 2) => {
-    const video = e.currentTarget;
-    if (video.duration) {
-      const timeLeft = video.duration - video.currentTime;
-      if (timeLeft <= CROSSFADE_DURATION) {
-         if (activeVideo === videoId) {
-            const nextVideoId = videoId === 1 ? 2 : 1;
-            const nextVideoRef = nextVideoId === 1 ? video1Ref : video2Ref;
-            setActiveVideo(nextVideoId);
-            if (nextVideoRef.current) {
-                nextVideoRef.current.currentTime = 0;
-                nextVideoRef.current.play().catch(() => {});
-            }
-         }
-      }
-    }
-  };
+  useEffect(() => {
+    let frameId: number;
+    const unsub = scrollProgress.onChange((latest: number) => {
+      frameId = requestAnimationFrame(() => {
+        if (videoRef.current && videoRef.current.duration) {
+          videoRef.current.currentTime = latest * videoRef.current.duration;
+        }
+      });
+    });
+    return () => {
+      unsub();
+      cancelAnimationFrame(frameId);
+    };
+  }, [scrollProgress]);
 
   return (
-    <>
-      <video
-        ref={video1Ref}
-        src={src}
-        autoPlay
-        loop
-        muted
-        playsInline
-        onTimeUpdate={(e) => handleTimeUpdate(e, 1)}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out z-0 ${activeVideo === 1 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
-      />
-      <video
-        ref={video2Ref}
-        src={src}
-        autoPlay
-        loop
-        muted
-        playsInline
-        onTimeUpdate={(e) => handleTimeUpdate(e, 2)}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out z-0 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
-      />
-    </>
+    <video
+      ref={videoRef}
+      src={src}
+      muted
+      playsInline
+      preload="auto"
+      className={`absolute inset-0 w-full h-full object-cover z-0 ${videoClassName || ''}`}
+    />
   );
 };
 
+
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const heroContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroScrollProgress } = useScroll({
+    target: heroContainerRef,
+    offset: ["start start", "end end"]
+  });
 
   // Suppress specific framer-motion list key warnings
   useEffect(() => {
@@ -499,13 +487,15 @@ export default function App() {
   return (
     <div className="w-full min-h-screen bg-black font-body text-white selection:bg-white/20">
       
-      {/* SECTION 1: HERO */}
-      <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        <SeamlessBackgroundVideo 
-          src="/hero-bg.mp4"
-          videoClassName="object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center]"
-        />
-        <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+      {/* SECTION 1: HERO CONTAINER */}
+      <div ref={heroContainerRef} className="h-[300vh] w-full relative">
+        <section className="sticky top-0 w-full h-screen flex flex-col items-center justify-center overflow-hidden">
+          <ScrubVideoBackground 
+            src="/hero_scroll_kf.mp4"
+            scrollProgress={heroScrollProgress}
+            videoClassName="object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center]"
+          />
+          <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
         {/* Navbar */}
         <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
@@ -601,6 +591,7 @@ export default function App() {
 
         </div>
       </section>
+      </div>
 
       {/* FERRAMENTAS */}
       <ToolsMarquee />
