@@ -498,6 +498,10 @@ export default function App() {
     offset: ["start start", "end end"]
   });
 
+  const uiOpacity = useTransform(heroScrollProgress, [0.05, 0.2], [0, 1]);
+  const uiY = useTransform(heroScrollProgress, [0.05, 0.2], [20, 0]);
+
+
   // Suppress specific framer-motion list key warnings
   useEffect(() => {
     const originalError = console.error;
@@ -545,7 +549,7 @@ export default function App() {
           <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
         {/* Navbar */}
-        <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
+        <motion.nav style={{ opacity: uiOpacity, y: uiY }} className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
           <div className="w-10 h-10 sm:w-12 sm:h-12 border border-white/20 rounded-full flex items-center justify-center text-lg sm:text-xl font-heading font-bold">
             LS
           </div>
@@ -571,7 +575,7 @@ export default function App() {
             <span className={`w-4 h-0.5 bg-white transition-opacity ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
             <span className={`w-4 h-0.5 bg-white transition-transform ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
           </button>
-        </nav>
+        </motion.nav>
 
         {/* Mobile Menu Overlay */}
         <AnimatePresence>
@@ -598,7 +602,7 @@ export default function App() {
         </AnimatePresence>
 
         {/* Hero Content */}
-        <div className="relative z-20 flex-1 flex flex-col items-start justify-center pt-24 px-8 md:px-16 lg:px-24 w-full">
+        <motion.div style={{ opacity: uiOpacity, y: uiY }} className="relative z-20 flex-1 flex flex-col items-start justify-center pt-24 px-8 md:px-16 lg:px-24 w-full">
           
           <div className="flex flex-col w-full">
             <TrueFocus 
@@ -614,8 +618,8 @@ export default function App() {
           </div>
 
           <motion.div 
-            initial={{ filter: "blur(10px)", opacity: 0, x: -20 }}
-            animate={{ filter: "blur(0px)", opacity: 1, x: 0 }}
+            initial={{ filter: "blur(10px)", x: -20 }}
+            animate={{ filter: "blur(0px)", x: 0 }}
             transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
             className="flex items-center gap-2 mt-6 sm:mt-8 ml-1 lg:ml-2"
           >
@@ -623,8 +627,8 @@ export default function App() {
           </motion.div>
 
           <motion.div 
-            initial={{ filter: "blur(10px)", opacity: 0, x: -20 }}
-            animate={{ filter: "blur(0px)", opacity: 1, x: 0 }}
+            initial={{ filter: "blur(10px)", x: -20 }}
+            animate={{ filter: "blur(0px)", x: 0 }}
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
@@ -636,7 +640,7 @@ export default function App() {
             </a>
           </motion.div>
 
-        </div>
+        </motion.div>
       </section>
       </div>
 
