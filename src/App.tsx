@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useInView, AnimatePresence, useScroll, useTransform, animate } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform, animate, useMotionValueEvent } from "framer-motion";
 import Hls from "hls.js";
 import { Player } from "@remotion/player";
 import ScrollStack, { ScrollStackItem } from "./components/ui/ScrollStack";
@@ -417,46 +417,39 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       if (playPromise !== undefined) {
         playPromise.then(() => {
           videoRef.current?.pause();
+          if (videoRef.current) {
+            // Force seek to slightly past 0 to bypass black frame
+            videoRef.current.currentTime = 0.1;
+          }
         }).catch(() => {});
       }
     }
   }, []);
 
-  useEffect(() => {
-    let frameId: number;
-    let isActive = true;
-
-    const renderLoop = () => {
-      if (!isActive) return;
-      if (videoRef.current && videoRef.current.readyState >= 1 && videoRef.current.duration) {
-        const latest = scrollProgress.get();
-        // Ensure video is updated exactly
-        const time = Math.min(Math.max(latest * videoRef.current.duration, 0), videoRef.current.duration - 0.01);
-        // Only update if difference is meaningful to prevent jank
-        if (Math.abs(videoRef.current.currentTime - time) > 0.01) {
-            videoRef.current.currentTime = time;
-        }
+  useMotionValueEvent(scrollProgress, "change", (latest: number) => {
+    if (videoRef.current && videoRef.current.readyState >= 1 && videoRef.current.duration) {
+      // Latest is 0 to 1
+      const progress = Math.max(0, Math.min(latest, 1));
+      const targetTime = progress * videoRef.current.duration;
+      // Smooth seeking
+      const current = videoRef.current.currentTime;
+      if (Math.abs(current - targetTime) > 0.05) {
+        videoRef.current.currentTime = targetTime;
       }
-      frameId = requestAnimationFrame(renderLoop);
-    };
-
-    frameId = requestAnimationFrame(renderLoop);
-
-    return () => {
-      isActive = false;
-      cancelAnimationFrame(frameId);
-    };
-  }, [scrollProgress]);
+    }
+  });
 
   return (
-    <video
-      ref={videoRef}
-      src={src}
-      muted
-      playsInline
-      preload="auto"
-      className={`absolute inset-0 w-full h-full object-cover z-0 ${videoClassName || ''}`}
-    />
+    <div className="absolute inset-0 w-full h-full z-0 pointer-events-none bg-[#0a0a0a]">
+      <video
+        ref={videoRef}
+        src={src}
+        muted
+        playsInline
+        preload="auto"
+        className={`w-full h-full object-cover transition-opacity duration-500 opacity-100 ${videoClassName || ''}`}
+      />
+    </div>
   );
 };
 
