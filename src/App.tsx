@@ -406,49 +406,85 @@ function PerspectiveMarqueeScene() {
 
 const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: string, videoClassName?: string, scrollProgress: any }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.defaultMuted = true;
-      videoRef.current.muted = true;
-      videoRef.current.setAttribute('playsinline', '');
+    let objectUrl: string | null = null;
+    
+    // Fetch video as Blob to ensure it's fully loaded into memory.
+    // This allows perfect scrolling frame-by-frame and solves Vercel streaming blank screens.
+    fetch(src)
+      .then(res => {
+         if (!res.ok) throw new Error("Network response was not ok");
+         return res.blob();
+      })
+      .then(blob => {
+        objectUrl = URL.createObjectURL(blob);
+        setVideoSrc(objectUrl);
+      })
+      .catch((err) => {
+        console.warn("Failed to fetch video blob, falling back to local src", err);
+        setVideoSrc(src); // Fallback to compiled vercel mp4
+      });
+
+    return () => {
+      if (objectUrl) {
+         URL.revokeObjectURL(objectUrl);
+      }
+    }
+  }, [src]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && videoSrc) {
+      video.defaultMuted = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
       
-      const playPromise = videoRef.current.play();
+      const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
-          videoRef.current?.pause();
-          if (videoRef.current) {
-            // Force seek to slightly past 0 to bypass black frame
-            videoRef.current.currentTime = 0.1;
-          }
+          video.pause();
+          video.currentTime = 0.05; // Seek forward slightly to show a frame instead of black
         }).catch(() => {});
       }
     }
-  }, []);
+  }, [videoSrc]);
 
   useMotionValueEvent(scrollProgress, "change", (latest: number) => {
-    if (videoRef.current && videoRef.current.readyState >= 1 && videoRef.current.duration) {
+    const video = videoRef.current;
+    if (video && video.readyState >= 1 && video.duration) {
       // Latest is 0 to 1
       const progress = Math.max(0, Math.min(latest, 1));
-      const targetTime = progress * videoRef.current.duration;
-      // Smooth seeking
-      const current = videoRef.current.currentTime;
-      if (Math.abs(current - targetTime) > 0.05) {
-        videoRef.current.currentTime = targetTime;
-      }
+      const targetTime = progress * video.duration;
+      
+      requestAnimationFrame(() => {
+        if (video) {
+            video.currentTime = targetTime;
+        }
+      });
     }
   });
 
   return (
     <div className="absolute inset-0 w-full h-full z-0 pointer-events-none bg-[#0a0a0a]">
-      <video
-        ref={videoRef}
-        src={src}
-        muted
-        playsInline
-        preload="auto"
-        className={`w-full h-full object-cover transition-opacity duration-500 opacity-100 ${videoClassName || ''}`}
-      />
+      {videoSrc ? (
+        <video
+          ref={videoRef}
+          src={videoSrc}
+          muted
+          playsInline
+          preload="auto"
+          className={`w-full h-full object-cover transition-opacity duration-1000 opacity-100 ${videoClassName || ''}`}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
+            {/* Loading indicator while Blob is downloading */}
+            <div className="w-8 h-8 rounded-full border-[3px] border-white/10 border-t-white/60 animate-spin" />
+        </div>
+      )}
     </div>
   );
 };
