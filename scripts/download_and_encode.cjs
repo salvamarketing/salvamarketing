@@ -37,9 +37,9 @@ function download(url, dest) {
 console.log("Downloading video...", url);
 download(url, input)
   .then(() => {
-    console.log("Download complete. Encoding to make every frame a keyframe...");
+    console.log("Download complete. Encoding with faststart...");
     try {
-      const cmd = `${ffmpegInstaller.path} -y -i ${input} -c:v libx264 -preset veryfast -crf 28 -g 1 -keyint_min 1 -an ${output}`;
+      const cmd = `${ffmpegInstaller.path} -y -i ${input} -c:v libx264 -preset veryfast -crf 28 -g 1 -keyint_min 1 -movflags +faststart -an ${output}`;
       console.log("Running:", cmd);
       execSync(cmd, { stdio: 'inherit' });
       console.log("Encoding complete!");

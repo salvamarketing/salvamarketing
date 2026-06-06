@@ -406,7 +406,6 @@ function PerspectiveMarqueeScene() {
 
 const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: string, videoClassName?: string, scrollProgress: any }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -414,33 +413,40 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       videoRef.current.muted = true;
       videoRef.current.setAttribute('playsinline', '');
       
-      // Attempt quick play/pause to unlock video element on iOS
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
           videoRef.current?.pause();
-        }).catch(() => {
-          // Playback blocked, it's fine, we are scrubbing anyway
-        });
+        }).catch(() => {});
       }
     }
   }, []);
 
   useEffect(() => {
     let frameId: number;
-    const unsub = scrollProgress.onChange((latest: number) => {
-      frameId = requestAnimationFrame(() => {
-        if (videoRef.current && videoRef.current.duration && isReady) {
-          // ensure we don't go out of bounds
-          videoRef.current.currentTime = Math.min(Math.max(latest * videoRef.current.duration, 0), videoRef.current.duration - 0.01);
+    let isActive = true;
+
+    const renderLoop = () => {
+      if (!isActive) return;
+      if (videoRef.current && videoRef.current.readyState >= 1 && videoRef.current.duration) {
+        const latest = scrollProgress.get();
+        // Ensure video is updated exactly
+        const time = Math.min(Math.max(latest * videoRef.current.duration, 0), videoRef.current.duration - 0.01);
+        // Only update if difference is meaningful to prevent jank
+        if (Math.abs(videoRef.current.currentTime - time) > 0.01) {
+            videoRef.current.currentTime = time;
         }
-      });
-    });
+      }
+      frameId = requestAnimationFrame(renderLoop);
+    };
+
+    frameId = requestAnimationFrame(renderLoop);
+
     return () => {
-      unsub();
+      isActive = false;
       cancelAnimationFrame(frameId);
     };
-  }, [scrollProgress, isReady]);
+  }, [scrollProgress]);
 
   return (
     <video
@@ -449,7 +455,6 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       muted
       playsInline
       preload="auto"
-      onLoadedMetadata={() => setIsReady(true)}
       className={`absolute inset-0 w-full h-full object-cover z-0 ${videoClassName || ''}`}
     />
   );
