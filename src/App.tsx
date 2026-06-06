@@ -454,7 +454,7 @@ const SeamlessBackgroundVideo = ({ src, videoClassName }: { src: string, videoCl
         muted
         playsInline
         onTimeUpdate={(e) => handleTimeUpdate(e, 2)}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out z-0 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out z-0 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'} ${videoClassName || ''}`}
       />
     </>
   );
