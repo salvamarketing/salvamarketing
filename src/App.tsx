@@ -406,12 +406,23 @@ function PerspectiveMarqueeScene() {
 
 const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: string, videoClassName?: string, scrollProgress: any }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Force mobile inline / muted
     if (videoRef.current) {
-        videoRef.current.defaultMuted = true;
-        videoRef.current.muted = true;
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.setAttribute('playsinline', '');
+      
+      // Attempt quick play/pause to unlock video element on iOS
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          videoRef.current?.pause();
+        }).catch(() => {
+          // Playback blocked, it's fine, we are scrubbing anyway
+        });
+      }
     }
   }, []);
 
@@ -419,8 +430,9 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
     let frameId: number;
     const unsub = scrollProgress.onChange((latest: number) => {
       frameId = requestAnimationFrame(() => {
-        if (videoRef.current && videoRef.current.duration) {
-          videoRef.current.currentTime = latest * videoRef.current.duration;
+        if (videoRef.current && videoRef.current.duration && isReady) {
+          // ensure we don't go out of bounds
+          videoRef.current.currentTime = Math.min(Math.max(latest * videoRef.current.duration, 0), videoRef.current.duration - 0.01);
         }
       });
     });
@@ -428,7 +440,7 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       unsub();
       cancelAnimationFrame(frameId);
     };
-  }, [scrollProgress]);
+  }, [scrollProgress, isReady]);
 
   return (
     <video
@@ -437,6 +449,7 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       muted
       playsInline
       preload="auto"
+      onLoadedMetadata={() => setIsReady(true)}
       className={`absolute inset-0 w-full h-full object-cover z-0 ${videoClassName || ''}`}
     />
   );
