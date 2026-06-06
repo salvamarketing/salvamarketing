@@ -439,6 +439,8 @@ const SeamlessBackgroundVideo = ({ src, videoClassName }: { src: string, videoCl
       <video
         ref={video1Ref}
         src={src}
+        autoPlay
+        loop
         muted
         playsInline
         onTimeUpdate={(e) => handleTimeUpdate(e, 1)}
@@ -447,6 +449,8 @@ const SeamlessBackgroundVideo = ({ src, videoClassName }: { src: string, videoCl
       <video
         ref={video2Ref}
         src={src}
+        autoPlay
+        loop
         muted
         playsInline
         onTimeUpdate={(e) => handleTimeUpdate(e, 2)}
