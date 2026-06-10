@@ -404,46 +404,12 @@ function PerspectiveMarqueeScene() {
   );
 }
 
-const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: string, videoClassName?: string, scrollProgress: any }) => {
+const VideoBackground = ({ src, videoClassName }: { src: string, videoClassName?: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    let objectUrl: string | null = null;
-    let isActive = true;
-    
-    // Fetch video as Blob to ensure it's fully loaded into memory.
-    // This allows perfect scrolling frame-by-frame and solves Vercel streaming blank screens.
-    fetch(src)
-      .then(res => {
-         if (!res.ok) throw new Error("Network response was not ok");
-         const contentType = res.headers.get("content-type");
-         if (contentType && contentType.includes("text/html")) {
-            throw new Error("Received HTML instead of video, probably a Vercel 404 fallback");
-         }
-         return res.blob();
-      })
-      .then(blob => {
-        if (!isActive) return;
-        objectUrl = URL.createObjectURL(blob);
-        setVideoSrc(objectUrl);
-      })
-      .catch((err) => {
-        console.warn("Failed to fetch video blob, falling back to local src", err);
-        if (isActive) setVideoSrc(src); // Fallback to compiled vercel mp4
-      });
-
-    return () => {
-      isActive = false;
-      if (objectUrl) {
-         URL.revokeObjectURL(objectUrl);
-      }
-    }
-  }, [src]);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video && videoSrc) {
+    if (video) {
       video.defaultMuted = true;
       video.muted = true;
       video.playsInline = true;
@@ -452,46 +418,35 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
       
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.then(() => {
-          video.pause();
-          video.currentTime = 0.05; // Seek forward slightly to show a frame instead of black
-        }).catch(() => {});
+        playPromise.catch(() => {});
       }
     }
-  }, [videoSrc]);
-
-  useMotionValueEvent(scrollProgress, "change", (latest: number) => {
-    const video = videoRef.current;
-    if (video && video.readyState >= 1 && video.duration) {
-      // Latest is 0 to 1
-      const progress = Math.max(0, Math.min(latest, 1));
-      const targetTime = progress * video.duration;
-      
-      requestAnimationFrame(() => {
-        if (video) {
-            video.currentTime = targetTime;
-        }
-      });
-    }
-  });
+  }, [src]);
 
   return (
-    <div className="absolute inset-0 w-full h-full z-0 pointer-events-none bg-[#0a0a0a]">
-      {videoSrc ? (
+    <div className="absolute inset-0 w-full h-full z-0 pointer-events-none bg-neutral-950 flex items-center justify-center px-3 pb-3 pt-[4.5rem] sm:px-4 sm:pb-4 sm:pt-[5.5rem] md:px-6 md:pb-6 md:pt-[6.5rem]">
+      <div className="relative w-full h-full rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/5 bg-[#050505] isolation-auto">
+        {/* Grain overlay for professional cinematic feel */}
+        <div 
+          className="absolute inset-0 z-20 pointer-events-none opacity-[0.06] mix-blend-screen" 
+          style={{backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")'}}
+        />
+        
+        {/* Subtle vignette/gradient overlay to ensure text readability */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-neutral-950/40 via-transparent to-neutral-950/80 pointer-events-none" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-tr from-neutral-950/20 via-transparent to-transparent pointer-events-none" />
+
         <video
           ref={videoRef}
-          src={videoSrc}
+          src={src}
           muted
+          autoPlay
+          loop
           playsInline
           preload="auto"
-          className={`w-full h-full object-cover transition-opacity duration-1000 opacity-100 ${videoClassName || ''}`}
+          className={`w-full h-full object-cover ${videoClassName || ''}`}
         />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
-            {/* Loading indicator while Blob is downloading */}
-            <div className="w-8 h-8 rounded-full border-[3px] border-white/10 border-t-white/60 animate-spin" />
-        </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -499,11 +454,6 @@ const ScrubVideoBackground = ({ src, videoClassName, scrollProgress }: { src: st
 
 export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const heroContainerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroScrollProgress } = useScroll({
-    target: heroContainerRef,
-    offset: ["start start", "end end"]
-  });
 
   // Suppress specific framer-motion list key warnings
   useEffect(() => {
@@ -539,17 +489,16 @@ export default function App() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-black font-body text-white selection:bg-white/20">
+    <div className="w-full min-h-[100svh] bg-neutral-950 font-body text-white selection:bg-white/20">
       
       {/* SECTION 1: HERO CONTAINER */}
-      <div ref={heroContainerRef} className="h-[300vh] w-full relative">
-        <section className="sticky top-0 w-full h-screen flex flex-col items-center justify-center overflow-hidden">
-          <ScrubVideoBackground 
-            src="/hero_scroll_kf.mp4"
-            scrollProgress={heroScrollProgress}
+      <div className="w-full relative h-[100svh]">
+        <section className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden">
+          <VideoBackground 
+            src="/hero_scroll_kf_v2.mp4"
             videoClassName="object-[65%_center] sm:object-[75%_center] md:object-[80%_center] lg:object-[85%_center]"
           />
-          <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+          <div className="absolute bottom-0 w-full h-64 bg-gradient-to-t from-neutral-950 to-transparent z-10 pointer-events-none" />
 
         {/* Navbar */}
         <nav className="fixed top-4 left-0 w-full px-6 md:px-8 lg:px-16 z-50 flex items-center justify-between mix-blend-difference text-white">
@@ -563,7 +512,7 @@ export default function App() {
             <a href="#experiencia" onClick={(e) => handleScrollTo(e, '#experiencia')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Experiência</a>
             <a href="#servicos" onClick={(e) => handleScrollTo(e, '#servicos')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Serviços</a>
             <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="px-3 py-2 text-sm font-medium hover:text-white/70 transition-colors">Portfólio</a>
-            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="bg-white text-black px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-1 ml-1 hover:bg-neutral-200 transition-colors">
+            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="hover-pulse bg-white text-black px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-1 ml-1 hover:bg-neutral-200 transition-colors">
               Contato <ArrowUpRightIcon className="h-4 w-4" />
             </a>
           </div>
@@ -635,10 +584,10 @@ export default function App() {
             transition={{ delay: 1.1, duration: 0.6, ease: "easeOut" }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-10 w-full sm:w-auto ml-1 lg:ml-2"
           >
-            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl bg-black/20 backdrop-blur-md border border-white/10">
+            <a href="#projetos" onClick={(e) => handleScrollTo(e, '#projetos')} className="hover-pulse liquid-glass text-white rounded-full px-8 py-3.5 sm:py-4 text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl bg-black/20 backdrop-blur-md border border-white/10">
               Ver Projetos <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="liquid-glass text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto py-3.5 sm:py-4 px-8 bg-black/20 backdrop-blur-md border border-white/10 shadow-xl">
+            <a href="#contato" onClick={(e) => handleScrollTo(e, '#contato')} className="hover-pulse liquid-glass text-white rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto py-3.5 sm:py-4 px-8 bg-black/20 backdrop-blur-md border border-white/10 shadow-xl">
               Entrar em Contato <PlayIcon className="h-4 w-4" />
             </a>
           </motion.div>
@@ -846,22 +795,22 @@ export default function App() {
              <div className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
                Marau — RS
              </div>
-             <a href="mailto:lazarosalvadori1@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
+             <a href="mailto:lazarosalvadori1@gmail.com" className="hover-pulse liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
                lazarosalvadori1@gmail.com
              </a>
-             <a href="mailto:salvaadesign@gmail.com" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
+             <a href="mailto:salvaadesign@gmail.com" className="hover-pulse liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center break-all bg-black/20 backdrop-blur-md border border-white/10">
                salvaadesign@gmail.com
              </a>
-             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
+             <a href="https://wa.me/5554996362178" target="_blank" rel="noreferrer" className="hover-pulse liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
                (54) 99636-2178
              </a>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0">
-            <a href="https://www.instagram.com/salvaagencia/" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
+            <a href="https://www.instagram.com/salvaagencia/" target="_blank" rel="noreferrer" className="hover-pulse liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
               Instagram @salvaagencia <ArrowUpRightIcon className="h-5 w-5" />
             </a>
-            <a href="https://www.behance.net/salvapng" target="_blank" rel="noreferrer" className="liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
+            <a href="https://www.behance.net/salvapng" target="_blank" rel="noreferrer" className="hover-pulse liquid-glass text-white rounded-full px-8 py-4 text-sm sm:text-base font-medium flex items-center justify-center gap-2 hover:bg-black/40 transition-colors w-full sm:w-auto shadow-xl text-center bg-black/20 backdrop-blur-md border border-white/10">
               Portfólio Behance <ArrowUpRightIcon className="h-5 w-5" />
             </a>
           </div>

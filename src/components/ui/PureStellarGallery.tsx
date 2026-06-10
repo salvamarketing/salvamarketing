@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Download, Heart, X } from "lucide-react"
-import BlurText from "./BlurText"
 
 type CardData = {
   img: string
@@ -167,12 +166,9 @@ export default function NeuralStellarGallery() {
 
       {/* HUD */}
       <div className="absolute top-24 md:top-32 left-6 md:left-12 z-20 pointer-events-none max-w-2xl">
-        <BlurText
-          text="Galeria de Resultados"
-          animateBy="words"
-          delay={100}
-          className="text-3xl md:text-6xl font-black mb-4 tracking-tighter uppercase text-[#E1E0CC] leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
-        />
+        <h2 className="text-3xl md:text-6xl font-black mb-4 tracking-tighter uppercase text-[#E1E0CC] leading-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+          Galeria de Resultados
+        </h2>
         <p className="mt-2 text-[10px] md:text-xs uppercase tracking-[0.2em] text-white/50 font-bold">
           Arraste para rotacionar • Scroll para zoom • Clique para detalhes
         </p>
